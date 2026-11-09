@@ -1,0 +1,17 @@
+{
+  "schema_version": "1.0",
+  "project": "rentalboard",
+  "known_issues": [],
+  "acceptance_order": ["optimization", "security", "validation"],
+  "scenarios": [
+    {"id": "RB-001", "requirement": "Overlapping active reservations for the same equipment must be rejected atomically.", "test": "tests/test_api.py::test_db_serializes_competing_reservations"},
+    {"id": "RB-002", "requirement": "The return date is exclusive; an adjacent rental may start on that date.", "test": "tests/test_api.py::test_booking_conflict_and_adjacent_dates"},
+    {"id": "RB-003", "requirement": "A user cannot read or mutate another workspace's equipment/customers/reservations.", "test": "tests/test_api.py::test_tenant_isolation"},
+    {"id": "RB-004", "requirement": "A viewer can read but cannot create or change operational records.", "test": "tests/test_api.py::test_viewer_cannot_mutate"},
+    {"id": "RB-005", "requirement": "Origin and session-bound CSRF protection are required for writes.", "test": "tests/test_api.py::test_origin_and_csrf_are_required"},
+    {"id": "RB-006", "requirement": "Cancelled reservations release dates; returned reservations cannot be checked out again.", "test": "tests/test_api.py::test_cancellation_releases_dates"},
+    {"id": "RB-007", "requirement": "Maintenance equipment cannot be checked out; reservation state transitions are enforced.", "test": "tests/test_api.py::test_status_machine_and_maintenance_guard"},
+    {"id": "RB-008", "requirement": "Human-facing booking flow preserves inputs on conflict, persists data and handles exact currency.", "test": "tests/browser.mjs"}
+  ],
+  "factory_gate_limit": "This manifest maps independent acceptance requirements to real checks. It is not the factory's full deterministic gate implementation or an LLM evaluation."
+}

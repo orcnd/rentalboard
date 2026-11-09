@@ -1,0 +1,33 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "rentalboard",
+  "main": "backend/worker.py",
+  "compatibility_date": "2026-11-09",
+  "compatibility_flags": ["python_workers"],
+  "assets": {
+    "directory": "./dist",
+    "binding": "ASSETS",
+    "run_worker_first": ["/api/*"],
+    "not_found_handling": "single-page-application",
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "rentalboard",
+      "database_id": "00000000-0000-0000-0000-000000000000",
+      "migrations_dir": "migrations",
+    },
+  ],
+  "vars": {
+    "PUBLIC_ORIGIN": "https://rent.orcuncandan.com",
+    "DEMO_ENABLED": "false",
+    "RELEASE_ID": "rentalboard-0.1.0",
+    "ENVIRONMENT": "production",
+  },
+  "observability": {
+    "enabled": true,
+  },
+  "limits": {
+    "cpu_ms": 30000,
+  },
+}

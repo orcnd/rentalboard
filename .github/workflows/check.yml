@@ -1,0 +1,36 @@
+name: RentalBoard acceptance
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: pip install 'fastapi>=0.115,<1' 'bcrypt==5.0.0' uvicorn httpx pytest bandit
+      - run: npm ci
+      - run: bandit -r backend -q
+      - run: pytest -q
+      - run: npm run build
+      - run: npx playwright install --with-deps chromium
+      - name: Browser acceptance
+        run: |
+          uvicorn backend.app:app --host 127.0.0.1 --port 8008 &
+          npm run dev &
+          for i in $(seq 1 30); do curl -fsS http://127.0.0.1:5174 >/dev/null && break; sleep 1; done
+          npm run test:e2e
+        env:
+          PUBLIC_ORIGIN: http://127.0.0.1:5174
+          DEMO_ENABLED: 'true'
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: rentalboard-acceptance
+          path: .factory/runs/

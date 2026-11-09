@@ -1,0 +1,4 @@
+PUBLIC_ORIGIN=http://127.0.0.1:8790
+DEMO_ENABLED=true
+ENVIRONMENT=development
+RELEASE_ID=rentalboard-0.1.0

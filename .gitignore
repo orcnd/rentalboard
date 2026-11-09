@@ -1,0 +1,16 @@
+.venv/
+.data/
+.factory/runs/
+node_modules/
+dist/
+__pycache__/
+.pytest_cache/
+.env
+.dev.vars
+.wrangler/
+*.pyc
+.worker-venv/
+.python/
+.venv-workers/
+python_modules/
+pylock.toml
