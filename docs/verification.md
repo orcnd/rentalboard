@@ -46,3 +46,12 @@ Yerel CPython 3.12.2; gerçek local Workers/Pyodide 3.14.2; Node 22.23.4; Wrangl
 - Auth/session kayıtları için retention job'u ve production abuse/Turnstile politikası sonraki işletim işidir.
 - Factory'nin LLM logical-evaluation ve kalibrasyon servisleri yapılandırılmadı. Buradaki geçerli testler tam fabrikanın sekiz skill'inin tamamının geçtiği anlamına gelmez.
 - Bildirim yerel inbox, investigation yerel intake'tir. Gerçek dış bildirim/model/factory kod çalıştırma ve otomatik deploy yoktur.
+
+## Ücretsiz yayın ve sentetik tester senaryoları (10 Kasım 2026)
+
+- Workers Free canary'de sağlık, kayıt, envanter ve rezervasyon denendi. Bir login isteği Cloudflare `Exceeded CPU Limit` / 1102 ile kesildi; sonraki login denemeleri geçse de bu aralıklı davranış nedeniyle canary silindi ve custom domaine bağlanmadı. Canlı D1 canary satırları temizlendi.
+- `rentalboard.orcuncandan.com` Cloudflare Tunnel ile yerel CPython FastAPI + SQLite'a bağlandı; bu, ücretli Workers planı gerektirmeyen self-host yöntemidir. İki bağımsız sentetik tester kaydoldu, giriş/oturum yenilemeyi, ekipman/müşteri eklemeyi, 2 gecelik 2.500 TL rezervasyonu ve sayfa yenileme sonrası kalıcılığı denedi. İki akış da geçti; JavaScript uygulama hatası görülmedi.
+- Test hesapları ve rezervasyonlar self-host SQLite'tan temizlendi. Üretim D1'inde migration şeması duruyor, sentetik satırlar yok.
+- Statik CSP data font kaynağına izin verecek şekilde düzeltildi. Cloudflare Insights üçüncü taraf betiği CSP tarafından bloklanıyor; analitik devre dışı, RentalBoard akışını etkilemedi.
+- Self-host kullanılabilirliği bilgisayarın açık, uyanık ve ağa bağlı olmasına bağlıdır. Windows oturum açma görevi API, arayüz ve tunnel'ı yeniden başlatır; yüksek erişilebilirlik veya sürekli internet bağlantısı garantisi değildir.
+- Host makinesinde DNS cache henüz eski NXDOMAIN yanıtı verebildi; Cloudflare authoritative DNS `rentalboard.orcuncandan.com` için proxied A yanıtı veriyor. Bazı DNS resolver'ları negatif önbellek süresi dolana dek gecikebilir.
