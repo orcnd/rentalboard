@@ -1,0 +1,10 @@
+tunnel: 355abd67-74db-4c1d-b76a-b2d6f8870113
+credentials-file: C:/Users/orcun/.cloudflared/355abd67-74db-4c1d-b76a-b2d6f8870113.json
+protocol: http2
+ingress:
+  - hostname: rentalboard.orcuncandan.com
+    path: ^/api(/.*)?$
+    service: http://127.0.0.1:8010
+  - hostname: rentalboard.orcuncandan.com
+    service: http://127.0.0.1:4174
+  - service: http_status:404

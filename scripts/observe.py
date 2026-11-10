@@ -2,6 +2,7 @@
 import argparse
 import importlib.util
 import json
+import re
 import time
 from pathlib import Path
 
@@ -33,8 +34,10 @@ def main():
     folder.mkdir(parents=True,exist_ok=True)
     source=folder/'events.jsonl'
     source.touch(exist_ok=True)
-    observer=observer_module.Observer(folder/'observation.sqlite',policy)
-    worker=worker_module.Worker(folder/'observation.sqlite',config)
+    state_name=re.sub(r'[^a-zA-Z0-9_-]+','-',settings['scope']['environment']).strip('-').lower()
+    state_path=folder/f'observation-{state_name}.sqlite'
+    observer=observer_module.Observer(state_path,policy)
+    worker=worker_module.Worker(state_path,config)
     try:
         while True:
             observer.poll(source)

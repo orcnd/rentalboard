@@ -14,12 +14,15 @@
     {
       "binding": "DB",
       "database_name": "rentalboard",
-      "database_id": "00000000-0000-0000-0000-000000000000",
+      "database_id": "b070e77e-c793-4d9d-b2be-7959f02a223c",
       "migrations_dir": "migrations",
     },
   ],
+  "routes": [
+    { "pattern": "rentalboard.orcuncandan.com", "custom_domain": true },
+  ],
   "vars": {
-    "PUBLIC_ORIGIN": "https://rent.orcuncandan.com",
+    "PUBLIC_ORIGIN": "https://rentalboard.orcuncandan.com",
     "DEMO_ENABLED": "false",
     "RELEASE_ID": "rentalboard-0.1.0",
     "ENVIRONMENT": "production",

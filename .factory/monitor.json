@@ -1,8 +1,8 @@
 {
-  "scope": {"project": "rentalboard", "environment": "development", "service": "rentalboard-api"},
-  "probe": {"url": "http://127.0.0.1:8008/api/health", "allow_local_http": true, "timeout_seconds": 5, "confirms_signature": "api.availability"},
+  "scope": {"project": "rentalboard", "environment": "production-self-host", "service": "rentalboard-api"},
+  "probe": {"url": "http://127.0.0.1:8010/api/health", "allow_local_http": true, "timeout_seconds": 5, "confirms_signature": "api.availability"},
   "upstream_repository": "https://github.com/orcnd/ai-code-factory",
   "tested_upstream_ref": "2fed268",
   "event_log": ".factory/runs/events.jsonl",
-  "notes": "Local adapter only. Cloudflare console export, real model and external notification adapters are not configured."
+  "notes": "API runs locally behind Cloudflare Tunnel. Cloudflare Workers logs, real model and external notification adapters are not configured."
 }

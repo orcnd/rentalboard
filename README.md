@@ -46,19 +46,43 @@ http://127.0.0.1:8790 üzerinde FastAPI, gerçek Workers Python/WASM runtime'ı,
 
 `pywrangler` uyumlu Pyodide wheel'lerini `python_modules/` içine çözer; bu klasörü Git'e ekleme. `uv.lock` geliştirici bağımlılıklarını sabitler. Workers için oluşturulan `pylock.toml` runtime'a özel üretilir. Paket veya compatibility date değiştiğinde Workers smoke testini yeniden çalıştır.
 
-## rent.orcuncandan.com yayını
+## Ücretsiz Cloudflare Tunnel ile yayın
 
-Bu repo kendi Cloudflare hesabında yayınlaman için hazırlanmıştır; otomatik deploy yapılmaz.
+`https://rentalboard.orcuncandan.com` uygulamayı yerelde çalışan FastAPI + SQLite'a bağlayan Cloudflare Tunnel üzerinden sunar. Statik Vue arayüzü Vite preview ile, `/api/*` ise doğrudan Uvicorn ile servis edilir. Cloudflare Workers Free istek başına 10 ms CPU ile sınırlı olduğundan girişte bcrypt işlemi için güvenilir değildir; ücretli Workers CPU limiti bu sebeple kullanılmıyor.
 
-1. `npx wrangler login` ile kendi hesabına bağlan.
-2. `npx wrangler d1 create rentalboard` ile D1 oluştur; dönen ID'yi `wrangler.jsonc` içindeki sıfır ID yerine koy.
-3. `PUBLIC_ORIGIN` değerini seçtiğin tam HTTPS adrese ayarla. `DEMO_ENABLED=false` kalsın; production için `ENVIRONMENT=production` ve her release için yeni `RELEASE_ID` kullan.
-4. `npx wrangler d1 migrations apply rentalboard --remote` çalıştır. Önce migration/backup planını staging'de doğrula.
-5. `npm run build`, ardından `uv run pywrangler deploy` çalıştır.
-6. Cloudflare Worker → Settings → Domains & Routes üzerinden `rent.orcuncandan.com` custom domain'ini ekle. Başka subdomain seçersen origin'i de aynı adres yapıp tekrar deploy et.
-7. HTTPS origin, kayıt/giriş, CSRF, iki ayrı workspace izolasyonu ve paralel rezervasyonu staging ve gerçek runtime üzerinde doğrula.
+Bu ücretsiz kurulumun çalışması için Windows bilgisayarın, Uvicorn, Vite preview ve `cloudflared` açık kalmalıdır. Bilgisayar uyursa veya kapanırsa site ulaşılamaz. SQLite dosyası `.data/rentalboard-hosted.sqlite` içindedir; düzenli dış yedekleme ve işletim sistemi güncellemeleri gerekir. Cloudflare Tunnel gelen bağlantıyı Cloudflare'dan makineye güvenli tünelden taşır; uygulama ve veriler bu bilgisayarda kalır.
 
-Worker ayarı 30 saniye CPU bütçesi içerir; parola hash'leme maliyeti nedeniyle Workers ücretli planı ve kaynak limitleri hesaba katılmalıdır. Paketin ücretsiz planda çalıştığı veya production maliyetinin ölçüldüğü iddia edilmez. Gerçek Cloudflare hesabına deploy ve DNS işlemi bu çalışmada yapılmamıştır.
+İlk kurulumdan sonra repo klasöründe üç PowerShell terminali aç:
+
+```powershell
+# terminal 1 — API ve kalıcı yerel veritabanı
+$env:PUBLIC_ORIGIN = 'https://rentalboard.orcuncandan.com'
+$env:DEMO_ENABLED = 'false'
+$env:ENVIRONMENT = 'production'
+$env:RELEASE_ID = 'rentalboard-0.1.0'
+$env:DATABASE_PATH = '.data/rentalboard-hosted.sqlite'
+uv run uvicorn backend.app:app --host 127.0.0.1 --port 8010 --proxy-headers --forwarded-allow-ips 127.0.0.1
+```
+
+```powershell
+# terminal 2 — build edilmiş arayüz
+npm ci
+npm run build
+npm run preview
+```
+
+```powershell
+# terminal 3 — tunnel
+cloudflared tunnel --config deploy/self-host/config.yml run rentalboard
+```
+
+Windows oturum açıldığında bu üç servisi başlatmak için `powershell -ExecutionPolicy Bypass -File deploy/self-host/register-startup-task.ps1` çalıştır. Task Scheduler kaydı kullanıcı oturumu açılınca API, Vite preview ve tunnel'ı gizli pencerelerde başlatır. Bilgisayar uyursa/kapanırsa internet yayını da durur.
+
+Tunnel ingress kuralı `/api/*` isteklerini `http://127.0.0.1:8010`, diğer istekleri `http://127.0.0.1:4174` hedefine yollar. Örnek şablon `deploy/self-host/tunnel.yml.example` dosyasındadır. Tunnel kimlik bilgilerini repo içine koyma. İlk kayıt ve girişten sonra ikinci bir workspace açarak tenant izolasyonunu elle doğrula. Ücretsiz Workers canary testi sentetik veride kayıt ve rezervasyonu gördü; ayrıca login sırasında gerçek CPU sınırı aşıldı, bu yüzden canary custom domaine bağlanmadı.
+
+## Cloudflare Workers ücretli alternatifi
+
+Eğer bilgisayarın sürekli açık kalması uygun değilse, `wrangler.jsonc` içindeki Workers + D1 yapılandırması kullanılabilir. Bu hesapta deployment sırasında Workers Free, `limits.cpu_ms=30000` değerini reddetti. Free limitini kaldırmak login'de aralıklı 1102/503 üretti; güvenilir kullanım için Workers Paid gerekir. D1 migration'ları `wrangler d1 migrations apply rentalboard --remote` ile tekrar uygulanabilir. Henüz kullanılmayan üretim D1'inde şema/migration kayıtları var, sentetik test verileri temizlendi; self-host SQLite'tan ayrıdır.
 
 ## Testler
 
@@ -77,7 +101,7 @@ Gerçek local Workers/D1 üzerinde eşzamanlı API testi: `uv run python -m test
 
 [ai-code-factory](https://github.com/orcnd/ai-code-factory) reposunu ayrıca klonla. `.factory/acceptance.json` bağımsız iş gereksinimlerini gerçek testlere bağlar. `.factory/known-issues.json` başlangıçta boştur.
 
-API'yi `EVENT_LOG_PATH=.factory/runs/events.jsonl` ortam değişkeniyle başlat; sonra:
+Self-host API'yi `EVENT_LOG_PATH=.factory/runs/events.jsonl` ortam değişkeniyle başlat; sonra:
 
 ```sh
 uv run python scripts/observe.py --factory-root ../ai-code-factory --watch
@@ -85,6 +109,6 @@ uv run python scripts/observe.py --factory-root ../ai-code-factory --watch
 
 Entegrasyonu sentetik olaylarla tek seferde doğrulamak için API 8008 portunda çalışırken `uv run python scripts/factory_smoke.py --factory-root ../ai-code-factory` çalıştır. Bu kontrol geçici dizin kullanır; gerçek bildirim veya model çağrısı yapmaz.
 
-Observer/worker bağlantısı normalize 5xx/DB sinyallerini ve sağlık kontrolünü kullanır. Mevcut factory sürümünde model beklemede, bildirim yerel inbox'ta, investigation repository context bekleyen intake olarak kalır. Factory kod çalıştırma, harici bildirim, insan onayı ve otomatik deploy tamamlanmış sayılmaz. Cloudflare konsol çıktısını bu JSONL akışına taşıyan collector ayrıca yapılandırılmalıdır. Sır, parola, cookie veya müşteri metni telemetry'ye yazılmaz.
+Observer/worker bağlantısı normalize 5xx/DB sinyallerini ve sağlık kontrolünü kullanır. Mevcut factory sürümünde model beklemede, bildirim yerel inbox'ta, investigation repository context bekleyen intake olarak kalır. Factory kod çalıştırma, harici bildirim, insan onayı ve otomatik deploy tamamlanmış sayılmaz. Sır, parola, cookie veya müşteri metni telemetry'ye yazılmaz.
 
 Güvenlik/kabul incelemesi ve doğrulama sınırları `docs/verification.md` içindedir.

@@ -1,0 +1,10 @@
+tunnel: <CLOUDFLARE_TUNNEL_UUID>
+credentials-file: C:/Users/<WINDOWS_USER>/.cloudflared/<CLOUDFLARE_TUNNEL_UUID>.json
+protocol: http2
+ingress:
+  - hostname: rentalboard.orcuncandan.com
+    path: ^/api(/.*)?$
+    service: http://127.0.0.1:8010
+  - hostname: rentalboard.orcuncandan.com
+    service: http://127.0.0.1:4174
+  - service: http_status:404
