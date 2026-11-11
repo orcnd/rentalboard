@@ -3,6 +3,7 @@
 .factory/runs/
 node_modules/
 dist/
+docs/media/page@*.webm
 __pycache__/
 .pytest_cache/
 .env

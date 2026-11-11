@@ -15,6 +15,10 @@ Fotoğraf/video ekipmanı kiralayan küçük işletmeler için çok kiracılı r
 
 Başlangıç planının 50 ekipman kotası backend/DB seviyesindedir. Ödeme/abonelik tahsilatı yoktur. E-posta doğrulama, parola sıfırlama, ekip daveti/rol yönetimi arayüzü, e-posta bildirimi ve saatlik kiralama bu MVP'ye dahil değildir. API'nin RBAC kuralları test edilir; bu, tamamlanmış ekip yönetimi ürünü değildir.
 
+## Kullanım videosu
+
+[RentalBoard kısa kullanım videosunu izle](docs/media/rentalboard-kullanim.webm). Video, yerel ve sentetik demo verisiyle takvimi, ekipman/müşteri yönetimini ve rezervasyon akışını gösterir.
+
 ## Yerel geliştirme
 
 Node 22.12+ ve Python 3.12+ ile:
@@ -100,6 +104,8 @@ Gerçek local Workers/D1 üzerinde eşzamanlı API testi: `uv run python -m test
 ## Fabrika bağlantısı
 
 [ai-code-factory](https://github.com/orcnd/ai-code-factory) reposunu ayrıca klonla. `.factory/acceptance.json` bağımsız iş gereksinimlerini gerçek testlere bağlar. `.factory/known-issues.json` başlangıçta boştur.
+
+Bu projede ai-code-factory observer'ı self-host servisin sağlığını ve normalize API 5xx sinyallerini izlemek için çalıştırıldı. Sentetik AI tester akışları kayıt/giriş, ekipman ve müşteri ekleme, rezervasyon oluşturma ve yenileme sonrası kalıcılığı denedi. Bu, fabrikanın tüm kabul becerilerinin, LLM değerlendirmesinin veya otomatik düzeltmenin üretimde etkin olduğu anlamına gelmez; bu adapter'lar bağlı değildir.
 
 Self-host API'yi `EVENT_LOG_PATH=.factory/runs/events.jsonl` ortam değişkeniyle başlat; sonra:
 
